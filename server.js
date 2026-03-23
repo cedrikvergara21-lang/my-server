@@ -3,6 +3,7 @@ const mongoose  = require('mongoose');
 const bcrypt    = require('bcryptjs');
 const jwt       = require('jsonwebtoken');
 const app = express();
+app.use(express.json());
 app.use(express.static('.'));
 
 // ① Connect to MongoDB
