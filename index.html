@@ -92,6 +92,25 @@
 
     input:focus { border-color: #534AB7; }
 
+    .password-wrapper { position: relative; }
+    .password-wrapper input { padding-right: 42px; }
+
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      color: #888;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .toggle-pw:hover { color: #534AB7; }
+
     button.submit {
       width: 100%;
       padding: 11px;
@@ -107,6 +126,7 @@
     }
 
     button.submit:hover { opacity: 0.88; }
+    button.submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .message {
       margin-top: 14px;
@@ -116,17 +136,8 @@
       display: none;
     }
 
-    .message.success {
-      background: #eaf3de;
-      color: #3B6D11;
-      display: block;
-    }
-
-    .message.error {
-      background: #fcebeb;
-      color: #A32D2D;
-      display: block;
-    }
+    .message.success { background: #eaf3de; color: #3B6D11; display: block; }
+    .message.error   { background: #fcebeb; color: #A32D2D; display: block; }
 
     #login-form, #register-form { display: none; }
     #login-form.active, #register-form.active { display: block; }
@@ -150,9 +161,12 @@
     </div>
     <div class="form-group">
       <label>Password</label>
-      <input type="password" id="login-password" placeholder="••••••••">
+      <div class="password-wrapper">
+        <input type="password" id="login-password" placeholder="••••••••">
+        <button class="toggle-pw" onclick="togglePassword('login-password', this)" type="button">👁</button>
+      </div>
     </div>
-    <button class="submit" onclick="handleLogin()">Login</button>
+    <button class="submit" id="login-btn" onclick="handleLogin()">Login</button>
     <div id="login-msg" class="message"></div>
   </div>
 
@@ -170,15 +184,17 @@
     </div>
     <div class="form-group">
       <label>Password</label>
-      <input type="password" id="reg-password" placeholder="••••••••">
+      <div class="password-wrapper">
+        <input type="password" id="reg-password" placeholder="••••••••">
+        <button class="toggle-pw" onclick="togglePassword('reg-password', this)" type="button">👁</button>
+      </div>
     </div>
-    <button class="submit" onclick="handleRegister()">Create account</button>
+    <button class="submit" id="register-btn" onclick="handleRegister()">Create account</button>
     <div id="register-msg" class="message"></div>
   </div>
 </div>
 
 <script>
-  // ← Replace this with your actual Render URL
   const API = 'https://my-server-o1sl.onrender.com';
 
   function switchTab(tab, el) {
@@ -188,10 +204,31 @@
     document.getElementById(tab + '-form').classList.add('active');
   }
 
+  function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁';
+    }
+  }
+
   async function handleLogin() {
     const email    = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
     const msg      = document.getElementById('login-msg');
+    const btn      = document.getElementById('login-btn');
+
+    if (!email || !password) {
+      msg.className   = 'message error';
+      msg.textContent = 'Please fill in all fields.';
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Logging in...';
 
     try {
       const res  = await fetch(`${API}/login`, {
@@ -211,8 +248,11 @@
       }
     } catch {
       msg.className   = 'message error';
-      msg.textContent = 'Could not connect to server.';
+      msg.textContent = 'Server is waking up, please try again in 30 seconds.';
     }
+
+    btn.disabled    = false;
+    btn.textContent = 'Login';
   }
 
   async function handleRegister() {
@@ -220,6 +260,16 @@
     const email    = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
     const msg      = document.getElementById('register-msg');
+    const btn      = document.getElementById('register-btn');
+
+    if (!name || !email || !password) {
+      msg.className   = 'message error';
+      msg.textContent = 'Please fill in all fields.';
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Creating account...';
 
     try {
       const res  = await fetch(`${API}/register`, {
@@ -238,8 +288,11 @@
       }
     } catch {
       msg.className   = 'message error';
-      msg.textContent = 'Could not connect to server.';
+      msg.textContent = 'Server is waking up, please try again in 30 seconds.';
     }
+
+    btn.disabled    = false;
+    btn.textContent = 'Create account';
   }
 </script>
 
