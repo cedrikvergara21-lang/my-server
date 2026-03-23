@@ -3,7 +3,7 @@ const mongoose  = require('mongoose');
 const bcrypt    = require('bcryptjs');
 const jwt       = require('jsonwebtoken');
 const app = express();
-app.use(express.json());
+app.use(express.static('.'));
 
 // ① Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 // Secret key for JWT — keep this private!
-const JWT_SECRET = 'mysecretkey123';
+const JWT_SECRET = process.env.JWT_SECRET || 'mysecretkey123';
 
 // ③ REGISTER route
 app.post('/register', async (req, res) => {
